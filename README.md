@@ -20,6 +20,8 @@ sample_secondsは記録上の間隔、interval_msは生成の実時間間隔で�
 
 ## 操作ガイド
 
+[ひな型の選び方・詳細設定の画面・自分のひな型の作り方](docs/preset-guide.md)
+
 [![ひな型の読込、設備台数、履歴の見本と生成開始を示すヒストリアン画面。青い枠は詳細設定。](docs/images/operation-guide.png)](docs/images/operation-guide.png)
 
 1. 計測値の履歴をつくるひな型を読み込みます。
