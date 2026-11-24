@@ -639,11 +639,11 @@ def register_data_routes(app, c, authorize):
             lo, hi = timestamp(start), timestamp(end)
         except ValueError as e:
             raise HTTPException(422, str(e)) from None
-        if (
-            lo > hi
-            or interval_seconds < 1
-            or (hi - lo) / interval_seconds > 10000
-        ):
+        if lo > hi or interval_seconds < 1:
+            raise HTTPException(422, "期間・間隔は1万区間以下にしてください")
+        # SQLと同じ切り捨てで終点の区間を決め、開始区間も上限に数える。
+        bucket_count = int((hi - lo) / interval_seconds) + 1
+        if bucket_count > 10000:
             raise HTTPException(422, "期間・間隔は1万区間以下にしてください")
         where = "ds=? AND tag=? AND ts>=? AND ts<=?" + (
             " AND quality='Good'" if good_only else ""
@@ -692,11 +692,7 @@ def register_data_routes(app, c, authorize):
         }
         values = []
         previous = None
-        indexes = (
-            range(int((hi - lo) // interval_seconds) + 1)
-            if fill != "none"
-            else sorted(points)
-        )
+        indexes = range(bucket_count) if fill != "none" else sorted(points)
         for i in indexes:
             value = points.get(i, previous if fill == "previous" else None)
             if i in points:
