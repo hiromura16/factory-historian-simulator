@@ -231,3 +231,56 @@ def test_missing_source_credentials_are_rejected_before_start():
                 == "none"
             )
             assert c.get("/api/state").json()["status"] == "stopped"
+
+
+def test_historian_aggregate_limits_inclusive_buckets():
+    """終点を含む補完件数を制限し、集計方式や欠測処理を変えない。"""
+    app = create_app("historian")
+    app.state.controller.ds = "synthetic-boundary"
+    with TestClient(app) as client:
+        params = {
+            "tag": "device-001.value",
+            "start": "2026-11-14T00:00:00Z",
+            "end": "2026-11-14T02:46:39.500Z",
+            "interval_seconds": 1,
+            "fill": "null",
+        }
+        path = "/source/history/aggregate"
+        response = client.get(path, params=params)
+        assert response.status_code == 200
+        values = response.json()["values"]
+        assert len(values) == 10000
+        assert values[-1] == {
+            "timestamp": "2026-11-14T02:46:39+00:00",
+            "value": None,
+            "filled": True,
+        }
+        for fill in ("none", "null", "previous"):
+            response = client.get(
+                path,
+                params={**params, "fill": fill, "end": "2026-11-14T02:46:40Z"},
+            )
+            assert response.status_code == 422
+        response = client.get(
+            path, params={**params, "end": params["start"], "fill": "previous"}
+        )
+        assert response.status_code == 200
+        assert len(response.json()["values"]) == 1
+
+
+def test_historian_preview_stays_within_one_or_two_generator_rows():
+    """短い生成設定のプレビューに範囲外の行を加えない。"""
+    app = create_app("historian")
+    with TestClient(app) as client:
+        state_before = client.get("/api/state").json()
+        for rows in (1, 2):
+            spec = Spec()
+            spec.generator.rows = rows
+            spec.generator.start_sequence = 50
+            response = client.post("/api/preview", json=spec.model_dump(mode="json"))
+            assert response.status_code == 200
+            preview = response.json()
+            assert preview["sequences"] == list(range(rows))
+            assert len(preview["records"]) == len(preview["anomaly_hits"]) == rows
+            assert preview["writes"] is False
+        assert client.get("/api/state").json() == state_before

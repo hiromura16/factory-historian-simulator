@@ -458,7 +458,8 @@ def create_app(kind):
     @app.post("/api/preview")
     def preview(spec: Spec):
         validate_generation(spec.generator)
-        offsets = sorted({0, 1, 2, *sample_offsets(spec.generator)})[:12]
+        first = range(min(3, spec.generator.rows))
+        offsets = sorted({*first, *sample_offsets(spec.generator)})[:12]
         records = []
         hits = []
         for offset in offsets:
