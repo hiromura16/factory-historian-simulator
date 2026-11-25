@@ -444,14 +444,17 @@ function description() {
 /* フォーム内の制約違反を探す。該当箇所のdetailsを開いてブラウザーの検証表示を出し、例外で後続操作を止める。 */
 function validated(
   selector,
+  showError = true,
 ) {
   for (const input of $(selector).querySelectorAll("input,select,textarea"))
     if (!input.checkValidity()) {
-      for (let details = input.closest("details"); details;
-        details = details.parentElement.closest("details")) {
-        details.open = true;
+      if (showError) {
+        for (let details = input.closest("details"); details;
+          details = details.parentElement.closest("details")) {
+          details.open = true;
+        }
+        input.reportValidity();
       }
-      input.reportValidity();
       throw new Error("入力を確認してください");
     }
 }
@@ -600,6 +603,23 @@ async function init() {
   render();
   profile = cleanProfile(profiles[0]);
   renderProfile();
+  window.FactoryComparison.mount({
+    app: "historian-simulator",
+    listPresets: () => presets,
+    currentSpec: () => {
+      validated("#specForm", false);
+      return copy(spec);
+    },
+    preview: (candidate) => api("/api/preview", candidate),
+    metrics: (spec) => ({
+      "設備数": spec.history.devices,
+      "履歴に保存する項目数": spec.history.tags.length,
+      "開始時に作る過去の時点数": spec.history.initial_samples,
+      "記録上の時刻の間隔（秒）": spec.history.sample_seconds,
+      "欠損を発生させる間隔": spec.history.missing_every,
+      "品質不良を発生させる間隔": spec.history.bad_every,
+    }),
+  });
   document
     .querySelectorAll("[data-tab]")
     .forEach(
