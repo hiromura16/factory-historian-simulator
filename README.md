@@ -1,6 +1,6 @@
 # ヒストリアン模擬 / 履歴・期間取得・集計
 
-[プリセット一覧](presets/README.md) · [Dokploy配備手順](docs/dokploy-deploy.md) · [コード読解ガイド](docs/code-reading-guide.md)
+[プリセット一覧](presets/README.md) · [アプリ別マニュアル](docs/user-manual.md) · [VMへのDocker Compose導入手順](docs/vm-compose.md) · [コード読解ガイド](docs/code-reading-guide.md)
 
 設備×タグ×時刻のサンプルをSQLiteに保存し、過去値のバックフィルと逐次記録を試験します。値とGood/Bad/Uncertain品質を保存し、論理的なサンプル位置をデータと同一トランザクションで記録します。
 
@@ -58,10 +58,10 @@ docker compose up -d --build
 `.env`のAPP_PORTが画面のポート、BIND_IPは既定127.0.0.1。管理画面と操作APIはログイン不要です。直接起動する場合:
 
 ```sh
-DATA_DIR="$PWD/data" AUTO_START=1 uv run uvicorn app:app --host 127.0.0.1 --port 8080 --workers 1
+DATA_DIR="$PWD/data" uv run uvicorn app:app --host 127.0.0.1 --port 8080 --workers 1
 ```
 
-1アプリ1プロセス・1実行。AUTO_START=1は初回に既定プリセットを開始。その後は保存済みの停止・実行状態を復元します。Docker再作成後もnamed volumeへ設定・データを保持。初期設定は小規模で、速度は保証値ではありません。interval_ms、batch_size、タグ/設備/件数等を増やす場合も、CPU・メモリ・容量上限を合わせて設定してください。
+1アプリ1プロセス・1実行。起動後は停止状態で、画面または操作APIからの開始を待ちます。Docker再作成後もnamed volumeへ設定・データを保持。初期設定は小規模で、速度は保証値ではありません。interval_ms、batch_size、タグ/設備/件数等を増やす場合も、CPU・メモリ・容量上限を合わせて設定してください。
 
 ## 認証・データと運用
 
@@ -80,7 +80,3 @@ DATA_DIRにはsettings.sqlite3、source.key、connection-files、永続データ
 Composeの管理ラベルは既定で `factory.guard.managed=true` です。外部監視側との合意が必要な場合は、非公開の配備設定で `FACTORY_GUARD_LABEL_PREFIX` を指定できます。例えば説明用の値 `synthetic-guard` を指定すると、`synthetic-guard.guard.managed=true` になります。
 
 既存の外部監視との互換性は未確認です。変更前に監視側が照合するラベル名と影響を確認してください。この設定は既存コンテナや監視設定を自動移行せず、デプロイも行いません。
-
-## Dokployでの配置と任意プロキシ
-
-[Dokployの設定・ビルド・ローカル確認手順](docs/dokploy-deploy.md)を参照してください。管理画面は未認証のため、そのままインターネットへ公開しないでください。
