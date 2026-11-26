@@ -12,10 +12,22 @@
 
 VMで準備する場合は[Docker Compose導入手順](vm-compose.md)で起動し、Web画面を開きます。
 
-1. 設備4台のひな型を読み込み、最初は「過去の時点数」を12、「記録上の時刻の間隔」を5秒にして開始します。
+1. 「正常 / 4設備 / 過去1000時点」を読み込み、「詳細設定」→「履歴・集計の設定」で「開始時に作る過去の時点数」を12、「記録上の時刻の間隔（秒）」を5秒にします。「履歴の見本を見る」で確認したら「履歴の生成を開始」を押します。
 2. VMから `http://127.0.0.1:3642/source/history/tags` を取得し、返ったタグ名を控えます。
 3. そのタグを `/source/history/raw?tag=device-001.value&limit=20` の `tag` に入れ、時刻順・値・品質を確認します。期間で絞る場合は `start` と `end` にタイムゾーン付きISO日時を指定します。
 4. 同じタグと期間で `/source/history/aggregate` の `function=mean` と `interval_seconds=60` を指定し、生値と1分集計を照合します。欠測は `fill=null` など指定した条件を確認します。
+
+集計をコマンドで確認する場合は、先に取得した `values` の先頭・末尾の `timestamp` を、タイムゾーンを含めて `start` と `end` に入れます。
+
+```sh
+tag='device-001.value'
+start='2026-11-26T00:00:00+00:00'
+end='2026-11-26T00:01:00+00:00'
+curl -fsSG http://127.0.0.1:3642/source/history/aggregate \
+  --data-urlencode "tag=$tag" --data-urlencode "start=$start" \
+  --data-urlencode "end=$end" --data-urlencode 'interval_seconds=60' \
+  --data-urlencode 'function=mean' --data-urlencode 'fill=null'
+```
 
 ## 停止と再起動
 
