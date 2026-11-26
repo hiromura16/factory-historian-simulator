@@ -9,6 +9,7 @@
 | [#9 Ubuntu 26.04 の Python 3.14 で直接起動できない／空きメモリ6GiB未満で全実行が失敗する](https://github.com/hiromura16/factory-historian-simulator/issues/9) | Python 3.12〜3.14の依存を解決し、メモリの既定しきい値を1GiBへ。 | [資料またはテスト](../tests/test_memory_guard.py) |
 | [#10 history.tags / source_time_field の誤りがエラーにならず、値null・品質Badの履歴として記録される](https://github.com/hiromura16/factory-historian-simulator/issues/10) | 参照している項目と型をプレビュー・保存・開始時に検証。 | [資料またはテスト](user-manual.md) |
 | [#11 製品品質レビュー](https://github.com/hiromura16/factory-historian-simulator/issues/11) | マニュアル、ひな型・設定ガイド、AIハーネス、API、管理認証の導入、ライセンス、変更履歴、CIを整備。 | [資料またはテスト](user-manual.md) |
+| [#12 AIエージェントからの利用](https://github.com/hiromura16/factory-historian-simulator/issues/12) | AI作業ルール、サーバー側の実行前確認、OpenAPIの項目説明、CLI、MCPを整備。 | [開発ルール](../AGENTS.md)・[CLI・MCP](mcp.md)・[回帰テスト](../tests/test_agent_clients.py) |
 
 構成例で接続先・ストレージ・認証を設定します。実運用先での配備と外部DBやブローカーの疎通は、各環境の運用手順に従って確認します。
 

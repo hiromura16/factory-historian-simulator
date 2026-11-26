@@ -1,17 +1,26 @@
 """生成項目と、利用するプロトコルの参照・型を検査する。"""
 
-from generation import GenerationError, validate_generation
+from contextlib import contextmanager
+from types import SimpleNamespace
+
+from generation import (
+    GenerationError,
+    encode_json,
+    generate_record,
+    generation_context,
+    sample_offsets,
+    validate_generation,
+)
 
 NUMERIC = {"integer", "number", "decimal"}
 MEASUREMENTS = NUMERIC | {"boolean"}
+IDENTIFICATION_PREVIEW_READERS = 8
 
 
 def validate_source_spec(kind, spec, *, modbus_enabled=True):
     """プレビュー・保存・開始に共通の、外部接続を行わない検証を実施する。"""
-    try:
+    with _generator_error_path():
         validate_generation(spec.generator, kind=kind)
-    except GenerationError as exc:
-        raise GenerationError(str(exc), path=("generator", *exc.path)) from None
 
     if kind == "api":
         _validate_resources(spec)
@@ -19,7 +28,46 @@ def validate_source_spec(kind, spec, *, modbus_enabled=True):
         _validate_equipment(spec, modbus_enabled)
     elif kind == "historian":
         _validate_history(spec)
+    elif kind == "logs":
+        _validate_log_template(spec)
+    elif kind == "identification":
+        _validate_identification_preview(spec)
     return spec
+
+
+@contextmanager
+def _generator_error_path():
+    """共通生成器が返す相対パスをスタジオの設定に合わせる。"""
+    try:
+        yield
+    except GenerationError as exc:
+        raise GenerationError(str(exc), path=("generator", *exc.path), code=exc.code) from None
+
+
+def _validate_log_template(spec):
+    """実配送と同じ本文の参照・書式を、接続や保存をせず検査する。"""
+    from drivers import EventDriver
+
+    def record(offset):
+        with _generator_error_path():
+            return generate_record(spec.generator, spec.generator.start_sequence + offset)
+
+    # EventDriver の開始や配送を呼ばず、整形に必要な入力だけを渡す。
+    driver = EventDriver(SimpleNamespace(kind="logs", spec=spec, record=record))
+    for offset in sorted({0, 1, 2, *sample_offsets(spec.generator)}):
+        row = driver.event(offset)
+        with generation_context("logs", "message_template"):
+            driver.log_message(row, offset)
+
+
+def _validate_identification_preview(spec):
+    """読取機ごとの見本も、他の代表行と同じように検査する。"""
+    options = spec.identification
+    count = min(len(options.readers), IDENTIFICATION_PREVIEW_READERS)
+    offsets = {0, 1, 2, *(index * options.tags for index in range(count))}
+    with _generator_error_path():
+        for offset in sorted(offsets.difference(sample_offsets(spec.generator))):
+            encode_json(generate_record(spec.generator, spec.generator.start_sequence + offset))
 
 
 def _validate_resources(spec):
@@ -42,6 +90,7 @@ def _validate_resources(spec):
             raise GenerationError(
                 f"{resource.name} の{source}を確認してください。{exc}",
                 path=("business", "resources", index, "generator", *exc.path),
+                code=exc.code,
             ) from None
 
 

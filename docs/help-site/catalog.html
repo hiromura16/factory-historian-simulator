@@ -15,7 +15,7 @@
     <a href="/">アプリに戻る</a>
   </div>
   <div class="help-layout">
-    <nav class="help-nav" aria-label="ヘルプ"><a href="/help/index.html">初めて使う</a><a href="/help/presets.html">ひな型を選ぶ・作る</a><a href="/help/templates.html">JSONの書き方</a><a href="/help/settings.html">設定リファレンス</a><a href="/help/api.html">APIの使い方</a><a href="/help/glossary.html">用語集</a><a href="/help/ai.html">AIにひな型を頼む</a><a href="/help/install.html">VMへの導入</a><a href="/help/catalog.html" aria-current="page">付属のひな型一覧</a></nav>
+    <nav class="help-nav" aria-label="ヘルプ"><a href="/help/index.html">初めて使う</a><a href="/help/presets.html">ひな型を選ぶ・作る</a><a href="/help/templates.html">JSONの書き方</a><a href="/help/settings.html">設定リファレンス</a><a href="/help/api.html">APIの使い方</a><a href="/help/glossary.html">用語集</a><a href="/help/ai.html">AIにひな型を頼む</a><a href="/help/mcp.html">CLI・MCP</a><a href="/help/install.html">VMへの導入</a><a href="/help/catalog.html" aria-current="page">付属のひな型一覧</a></nav>
     <main class="help-content" id="help-content">
       <nav class="help-outline" aria-label="このページ"><a href="#ひな型ごとの内容">ひな型ごとの内容</a></nav>
       <div class="help-search" hidden><label for="help-filter">表を検索</label><input id="help-filter" type="search" placeholder="日本語、ID、JSONキー"><p id="help-results" role="status"></p></div>
@@ -28,7 +28,7 @@
 <th>ID</th>
 <th>表示名</th>
 <th>最大tick数</th>
-<th>想定</th>
+<th>生成する内容</th>
 </tr>
 </thead>
 <tbody>
@@ -36,145 +36,145 @@
 <td><a href="#01-normal">01-normal</a></td>
 <td>正常 / 4設備 / 過去1000時点</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。4設備 / 過去1000時点を想定</td>
+<td>4設備 / 過去1000時点を想定</td>
 </tr>
 <tr>
 <td><a href="#02-normal">02-normal</a></td>
 <td>正常 / 1設備 / 長い履歴</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。1設備 / 長い履歴を想定</td>
+<td>1設備×valueを1秒間隔で保存。過去10000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日</td>
 </tr>
 <tr>
 <td><a href="#03-normal">03-normal</a></td>
 <td>正常 / 16設備 / 複数系列</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。16設備 / 複数系列を想定</td>
+<td>16設備×valueを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日</td>
 </tr>
 <tr>
 <td><a href="#04-normal">04-normal</a></td>
 <td>正常 / 0.1秒サンプリング</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。0.1秒サンプリングを想定</td>
+<td>更新周期100ms、最大tick数無制限。 4設備×valueを0.1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日</td>
 </tr>
 <tr>
 <td><a href="#05-normal">05-normal</a></td>
 <td>正常 / 60秒サンプリング</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。60秒サンプリングを想定</td>
+<td>4設備×valueを60秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日</td>
 </tr>
 <tr>
 <td><a href="#06-normal">06-normal</a></td>
 <td>正常 / 温度と圧力</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。温度と圧力を想定</td>
+<td>4設備×temperature, pressureを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日</td>
 </tr>
 <tr>
 <td><a href="#07-normal">07-normal</a></td>
 <td>正常 / 初期履歴なし / 逐次記録</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。初期履歴なし / 逐次記録を想定</td>
+<td>4設備×valueを1秒間隔で保存。過去0時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日</td>
 </tr>
 <tr>
 <td><a href="#08-normal">08-normal</a></td>
 <td>正常 / 1日保持</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。1日保持を想定</td>
+<td>4設備×valueを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持1日</td>
 </tr>
 <tr>
 <td><a href="#09-normal">09-normal</a></td>
 <td>正常 / 長期間保持</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。長期間保持を想定</td>
+<td>4設備×valueを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持365日</td>
 </tr>
 <tr>
 <td><a href="#10-normal">10-normal</a></td>
 <td>正常 / 遅い更新周期</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。遅い更新周期を想定</td>
+<td>更新周期5000ms、最大tick数無制限</td>
 </tr>
 <tr>
 <td><a href="#11-normal">11-normal</a></td>
 <td>正常 / 任意タグの名前</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。任意タグの名前を想定</td>
+<td>4設備×temperatureを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日</td>
 </tr>
 <tr>
 <td><a href="#12-normal">12-normal</a></td>
 <td>正常 / 集計検証 / 固定値</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。集計検証 / 固定値を想定</td>
+<td>集計検証 / 固定値を想定</td>
 </tr>
 <tr>
 <td><a href="#13-anomaly">13-anomaly</a></td>
 <td>異常 / サンプル欠落</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。サンプル欠落を想定</td>
+<td>サンプル欠落を想定</td>
 </tr>
 <tr>
 <td><a href="#14-anomaly">14-anomaly</a></td>
 <td>異常 / Bad品質</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。Bad品質を想定</td>
+<td>Bad品質を想定</td>
 </tr>
 <tr>
 <td><a href="#15-anomaly">15-anomaly</a></td>
 <td>異常 / Uncertain品質</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。Uncertain品質を想定</td>
+<td>3時点ごとに品質Uncertainを記録</td>
 </tr>
 <tr>
 <td><a href="#16-anomaly">16-anomaly</a></td>
 <td>異常 / 過去時刻への逆転</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。過去時刻への逆転を想定</td>
+<td>5時点ごとに時刻を-120秒ずらす。元の時刻軸からの単発シフト</td>
 </tr>
 <tr>
 <td><a href="#17-anomaly">17-anomaly</a></td>
 <td>異常 / 未来時刻</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。未来時刻を想定</td>
+<td>5時点ごとに時刻を86400秒ずらす。元の時刻軸からの単発シフト</td>
 </tr>
 <tr>
 <td><a href="#18-anomaly">18-anomaly</a></td>
 <td>異常 / 突発値</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。突発値を想定</td>
+<td>項目valueへset、値=250を生成位置20〜100で適用。異常後の型検証を迂回=False</td>
 </tr>
 <tr>
 <td><a href="#19-anomaly">19-anomaly</a></td>
 <td>異常 / ドリフト</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。ドリフトを想定</td>
+<td>項目valueへramp、値=1を生成位置20〜100で適用。異常後の型検証を迂回=False</td>
 </tr>
 <tr>
 <td><a href="#20-anomaly">20-anomaly</a></td>
 <td>異常 / 固着</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。固着を想定</td>
+<td>項目valueへfreeze、値=Noneを生成位置20〜100で適用。異常後の型検証を迂回=False</td>
 </tr>
 <tr>
 <td><a href="#21-anomaly">21-anomaly</a></td>
 <td>異常 / NULL値</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。NULL値を想定</td>
+<td>項目valueへnull、値=Noneを生成位置20〜100で適用。異常後の型検証を迂回=False</td>
 </tr>
 <tr>
 <td><a href="#22-anomaly">22-anomaly</a></td>
 <td>異常 / 不正な型</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。不正な型を想定</td>
+<td>項目valueへset、値='BAD'を生成位置20〜100で適用。異常後の型検証を迂回=True</td>
 </tr>
 <tr>
 <td><a href="#23-anomaly">23-anomaly</a></td>
 <td>異常 / 欠測と品質異常の混在</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。欠測と品質異常の混在を想定</td>
+<td>欠測と品質異常の混在を想定</td>
 </tr>
 <tr>
 <td><a href="#24-anomaly">24-anomaly</a></td>
 <td>異常 / 一定値 / 変化なし</td>
 <td>手動停止まで</td>
-<td>期間指定、品質コード、欠測、集計と過去値取得の検証。一定値 / 変化なしを想定</td>
+<td>一定値 / 変化なしを想定</td>
 </tr>
 </tbody>
 </table>
@@ -319,7 +319,7 @@
 <p><strong>異常 / 突発値</strong> · <a href="/help/preset-files/18-anomaly.json">JSONをダウンロード</a></p>
 <ul>
 <li><strong>想定</strong>　期間指定、品質コード、欠測、集計と過去値取得の検証。突発値を想定。</li>
-<li><strong>生成内容・条件</strong>　更新周期1000ms、最大tick数無制限。 4設備×valueを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日。 項目valueへset、値=250を生成位置20〜100で適用。異常後の型検証を迂回=いいえ。</li>
+<li><strong>生成内容・条件</strong>　更新周期1000ms、最大tick数無制限。 4設備×valueを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日。 項目valueへset、値=250を生成位置20〜100で適用。異常後の型検証を迂回=False。</li>
 <li><strong>確認事項</strong>　rawの時刻・値・品質を照合し、同時刻の複数サンプルもカーソルで取得。 mean/min/max/sum/count/last、Goodのみの集計、欠測補完none/null/previousの違いを確認。欠測は0として扱わない。</li>
 <li><strong>実行前</strong>　公開・認証・送信先は別のプロファイルで指定し、保存後に停止・開始して適用。各条件はフォームとJSONで編集可能。</li>
 </ul>
@@ -327,7 +327,7 @@
 <p><strong>異常 / ドリフト</strong> · <a href="/help/preset-files/19-anomaly.json">JSONをダウンロード</a></p>
 <ul>
 <li><strong>想定</strong>　期間指定、品質コード、欠測、集計と過去値取得の検証。ドリフトを想定。</li>
-<li><strong>生成内容・条件</strong>　更新周期1000ms、最大tick数無制限。 4設備×valueを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日。 項目valueへramp、値=1を生成位置20〜100で適用。異常後の型検証を迂回=いいえ。</li>
+<li><strong>生成内容・条件</strong>　更新周期1000ms、最大tick数無制限。 4設備×valueを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日。 項目valueへramp、値=1を生成位置20〜100で適用。異常後の型検証を迂回=False。</li>
 <li><strong>確認事項</strong>　rawの時刻・値・品質を照合し、同時刻の複数サンプルもカーソルで取得。 mean/min/max/sum/count/last、Goodのみの集計、欠測補完none/null/previousの違いを確認。欠測は0として扱わない。</li>
 <li><strong>実行前</strong>　公開・認証・送信先は別のプロファイルで指定し、保存後に停止・開始して適用。各条件はフォームとJSONで編集可能。</li>
 </ul>
@@ -335,7 +335,7 @@
 <p><strong>異常 / 固着</strong> · <a href="/help/preset-files/20-anomaly.json">JSONをダウンロード</a></p>
 <ul>
 <li><strong>想定</strong>　期間指定、品質コード、欠測、集計と過去値取得の検証。固着を想定。</li>
-<li><strong>生成内容・条件</strong>　更新周期1000ms、最大tick数無制限。 4設備×valueを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日。 項目valueへfreeze、値=Noneを生成位置20〜100で適用。異常後の型検証を迂回=いいえ。</li>
+<li><strong>生成内容・条件</strong>　更新周期1000ms、最大tick数無制限。 4設備×valueを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日。 項目valueへfreeze、値=Noneを生成位置20〜100で適用。異常後の型検証を迂回=False。</li>
 <li><strong>確認事項</strong>　rawの時刻・値・品質を照合し、同時刻の複数サンプルもカーソルで取得。 mean/min/max/sum/count/last、Goodのみの集計、欠測補完none/null/previousの違いを確認。欠測は0として扱わない。</li>
 <li><strong>実行前</strong>　公開・認証・送信先は別のプロファイルで指定し、保存後に停止・開始して適用。各条件はフォームとJSONで編集可能。</li>
 </ul>
@@ -343,7 +343,7 @@
 <p><strong>異常 / NULL値</strong> · <a href="/help/preset-files/21-anomaly.json">JSONをダウンロード</a></p>
 <ul>
 <li><strong>想定</strong>　期間指定、品質コード、欠測、集計と過去値取得の検証。NULL値を想定。</li>
-<li><strong>生成内容・条件</strong>　更新周期1000ms、最大tick数無制限。 4設備×valueを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日。 項目valueへnull、値=Noneを生成位置20〜100で適用。異常後の型検証を迂回=いいえ。</li>
+<li><strong>生成内容・条件</strong>　更新周期1000ms、最大tick数無制限。 4設備×valueを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日。 項目valueへnull、値=Noneを生成位置20〜100で適用。異常後の型検証を迂回=False。</li>
 <li><strong>確認事項</strong>　rawの時刻・値・品質を照合し、同時刻の複数サンプルもカーソルで取得。 mean/min/max/sum/count/last、Goodのみの集計、欠測補完none/null/previousの違いを確認。欠測は0として扱わない。</li>
 <li><strong>実行前</strong>　公開・認証・送信先は別のプロファイルで指定し、保存後に停止・開始して適用。各条件はフォームとJSONで編集可能。</li>
 </ul>
@@ -351,7 +351,7 @@
 <p><strong>異常 / 不正な型</strong> · <a href="/help/preset-files/22-anomaly.json">JSONをダウンロード</a></p>
 <ul>
 <li><strong>想定</strong>　期間指定、品質コード、欠測、集計と過去値取得の検証。不正な型を想定。</li>
-<li><strong>生成内容・条件</strong>　更新周期1000ms、最大tick数無制限。 4設備×valueを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日。 項目valueへset、値='BAD'を生成位置20〜100で適用。異常後の型検証を迂回=はい。</li>
+<li><strong>生成内容・条件</strong>　更新周期1000ms、最大tick数無制限。 4設備×valueを1秒間隔で保存。過去1000時点を初回に作成し、その後1tickに1時点ずつ追加。保持90日。 項目valueへset、値='BAD'を生成位置20〜100で適用。異常後の型検証を迂回=True。</li>
 <li><strong>確認事項</strong>　rawの時刻・値・品質を照合し、同時刻の複数サンプルもカーソルで取得。 mean/min/max/sum/count/last、Goodのみの集計、欠測補完none/null/previousの違いを確認。欠測は0として扱わない。</li>
 <li><strong>実行前</strong>　公開・認証・送信先は別のプロファイルで指定し、保存後に停止・開始して適用。各条件はフォームとJSONで編集可能。</li>
 </ul>

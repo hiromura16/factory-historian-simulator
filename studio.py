@@ -23,8 +23,10 @@ from pydantic import BaseModel, Field
 from validation import validate_source_spec
 from models import Profile, Spec, TITLES, SECRETS
 from config import ConfigurationError
+from generation import anomaly_warnings
 from generation import generate_record, sample_offsets
 from store import Store
+from operation_confirmation import CONFIRMATION_HEADER, install_operation_gate
 from api_support import (
     install_error_handlers, install_help,
     management_credentials, unauthorized_management,
@@ -342,6 +344,10 @@ def create_app(kind):
 
     app.mount("/static", StaticFiles(directory=root / "static"), name="static")
     install_help(app, root, True, kind, credentials)
+    gate = install_operation_gate(
+        app, kind, store, Spec,
+        validate=lambda spec, _revision: validate_source_spec(kind, spec),
+    )
 
     # 静的な管理画面の入口を返す。
     @app.get("/", include_in_schema=False)
@@ -515,6 +521,7 @@ def create_app(kind):
         return {
             "records": records,
             "anomaly_hits": hits,
+            "warnings": anomaly_warnings(spec.generator, prefix=("generator",)),
             "sequences": offsets,
             "writes": False,
             "validated_spec": spec.model_dump(mode="json"),
@@ -528,10 +535,13 @@ def create_app(kind):
         tags=['実行・出力'],
         responses={409: {'description': 'すでに実行中です'}},
     )
-    def start(spec: Spec):
+    def start(request: Request, spec: Spec):
         """設定を確定しバックグラウンドに開始を依頼します。現在の状態は GET /api/state で確認します。"""
         try:
-            return controller.start(spec)
+            validate_source_spec(kind, spec)
+            operation = gate.assess("/api/start", spec)
+            gate.require(operation, request.headers.get(CONFIRMATION_HEADER))
+            return controller.start(spec, revision=operation.revision)
         except RuntimeError as e:
             raise HTTPException(409, str(e)) from None
 
