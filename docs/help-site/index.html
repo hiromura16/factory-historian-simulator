@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>初めて使う | ヒストリアンシミュレーター</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/help.css">
+  <script src="/static/help.js" defer></script>
+</head>
+<body class="help-page">
+  <a class="help-skip" href="#help-content">本文へ移動</a>
+  <div class="help-top">
+    <a class="help-home" href="/">ヒストリアンシミュレーター</a>
+    <a href="/">アプリに戻る</a>
+  </div>
+  <div class="help-layout">
+    <nav class="help-nav" aria-label="ヘルプ"><a href="/help/index.html" aria-current="page">初めて使う</a><a href="/help/presets.html">ひな型を選ぶ・作る</a><a href="/help/templates.html">JSONの書き方</a><a href="/help/settings.html">設定リファレンス</a><a href="/help/api.html">APIの使い方</a><a href="/help/glossary.html">用語集</a><a href="/help/ai.html">AIにひな型を頼む</a><a href="/help/install.html">VMへの導入</a><a href="/help/catalog.html">付属のひな型一覧</a></nav>
+    <main class="help-content" id="help-content">
+      <nav class="help-outline" aria-label="このページ"><a href="#最初に試すこと">最初に試すこと</a><a href="#よくある質問">よくある質問</a><a href="#生値の次に集計を試す">生値の次に集計を試す</a><a href="#停止と再起動">停止と再起動</a><a href="#想定した結果が出ないとき">想定した結果が出ないとき</a><a href="#時間の2種類を確認する">時間の2種類を確認する</a><a href="#次に読む">次に読む</a></nav>
+      <article><h1>ヒストリアンシミュレーター 操作マニュアル</h1>
+<p>履歴収集で、設備の過去値、生値の時系列、品質付きの集計を正しく読めるか検証します。値と品質、記録時刻をSQLiteに保存し、収集側は履歴REST APIから取得します。</p>
+<h2 id="最初に試すこと">最初に試すこと</h2>
+<p><strong>12時点の設備履歴を作り、生の記録を読む</strong>。タグ一覧から対象を1つ選び、時刻・値・品質を持つ記録を読み取れます。</p>
+<p><a href="/help/install.html">Docker Compose導入手順</a>で準備し、VMで <code>http://127.0.0.1:3642/</code> を開きます。</p>
+<p>タグは履歴を検索するための項目名です。生値には記録時刻と品質が付きます。集計は、同じ区間に入った複数の値を平均など1つの値にまとめたものです。</p>
+<ol>
+<li>「正常 / 4設備 / 過去1000時点」を読み込みます。「詳細設定 → 履歴・集計の設定」で「開始時に作る過去の時点数」を <code>12</code>、「記録上の時刻の間隔（秒）」を <code>5</code> にします。</li>
+<li>「履歴の見本を見る」で時刻と値の見本を確認し、「履歴の生成を開始」を押します。実行中は追加の記録も増えます。</li>
+<li>同じアドレスの <code>/source/history/tags</code> を開き、返ったタグ名を1つ控えます。<code>/source/history/raw?tag=device-001.value&amp;limit=20</code> の <code>tag</code> をその名前に差し替えます。</li>
+<li>値と品質を確認します。件数が増えるのを止めるには実行状況の停止を押します。平均を試す場合は操作マニュアルの集計例で、実データが含まれる期間を指定します。</li>
+</ol>
+<p><a href="/help/images/operation-guide.png"><img src="/help/images/operation-guide.png" alt="最初の操作と確認箇所" loading="lazy" /></a></p>
+<h2 id="よくある質問">よくある質問</h2>
+<h3 id="生成周期と記録時刻の間隔は同じですか">生成周期と記録時刻の間隔は同じですか？</h3>
+<p>生成周期は実際に次のデータを作るまでの時間です。記録上の間隔は合成履歴の時刻の間隔です。</p>
+<h3 id="期間を指定すると空になります">期間を指定すると空になります</h3>
+<p>タグ名とタイムゾーンを確認します。まず期間なしで生値を取得し、返った時刻を使って期間を狭めます。</p>
+<h3 id="平均に含まれない値があります">平均に含まれない値があります</h3>
+<p>集計は既定で正常な品質だけを使います。<code>good_only</code> と欠測時の <code>fill</code> を照合します。</p>
+<h2 id="生値の次に集計を試す">生値の次に集計を試す</h2>
+<p>集計をコマンドで確認する場合は、先に取得した <code>values</code> の先頭・末尾の <code>timestamp</code> を、タイムゾーンを含めて <code>start</code> と <code>end</code> に入れます。</p>
+<pre><code class="language-sh">tag='device-001.value'
+start='2026-11-26T00:00:00+00:00'
+end='2026-11-26T00:01:00+00:00'
+curl -fsSG http://127.0.0.1:3642/source/history/aggregate \
+  --data-urlencode &quot;tag=$tag&quot; --data-urlencode &quot;start=$start&quot; \
+  --data-urlencode &quot;end=$end&quot; --data-urlencode 'interval_seconds=60' \
+  --data-urlencode 'function=mean' --data-urlencode 'fill=null'
+</code></pre>
+<h2 id="停止と再起動">停止と再起動</h2>
+<p>「実行状況・取得方法」で停止し、記録が増えないことを確認します。保持日数による掃除は稼働中の対象データセットに適用され、別の試験データはボリュームに残ります。</p>
+<h2 id="想定した結果が出ないとき">想定した結果が出ないとき</h2>
+<p>タグ一覧が空なら履歴生成を開始したか確認します。見本と取得結果の違いは、品質フィルター、期間、記録上のタイムゾーンを順に照合します。</p>
+<h2 id="時間の2種類を確認する">時間の2種類を確認する</h2>
+<table>
+<thead>
+<tr>
+<th>設定</th>
+<th>役割</th>
+<th>例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>interval_ms</td>
+<td>実時間で次の処理を行うまでの待機</td>
+<td>1000で約1秒ごとに処理します。</td>
+</tr>
+<tr>
+<td>sample_seconds</td>
+<td>合成した過去履歴の記録時刻の間隔</td>
+<td>60なら記録は12:00、12:01、12:02のように並びます。</td>
+</tr>
+</tbody>
+</table>
+<p>開始後にタグと生値の取得で時刻を確認します。同じタグと期間を集計APIに渡し、平均などを照合します。</p>
+<h2 id="次に読む">次に読む</h2>
+<ul>
+<li><a href="/help/presets.html">ひな型を選ぶ・作る</a></li>
+<li><a href="/help/settings.html">設定リファレンス</a></li>
+<li><a href="/help/templates.html">JSONの書き方</a></li>
+<li><a href="/help/api.html">APIの使い方</a></li>
+<li><a href="/help/glossary.html">用語集</a></li>
+</ul>
+</article>
+    </main>
+  </div>
+</body>
+</html>

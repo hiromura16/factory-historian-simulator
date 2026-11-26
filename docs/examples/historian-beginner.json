@@ -1,0 +1,55 @@
+{
+  "name": "ヒストリアン / 炉温度と圧力 / 8設備",
+  "description": "【想定】8台の炉の温度・圧力を1秒間隔で1日分バックフィルし、その後リアルタイムで追記する。\n【異常】記録位置4000〜4399（500〜549時点目）で温度が固着。",
+  "interval_ms": 1000,
+  "generator": {
+    "run_key": "furnace-001",
+    "seed": 5,
+    "fields": [
+      {
+        "name": "id",
+        "data_type": "string",
+        "generator": "record_id",
+        "primary_key": true,
+        "length": 64
+      },
+      {
+        "name": "temperature",
+        "data_type": "number",
+        "generator": "normal",
+        "mean": 850,
+        "stddev": 3,
+        "scale": 1
+      },
+      {
+        "name": "pressure_kpa",
+        "data_type": "number",
+        "generator": "uniform",
+        "minimum": 101.0,
+        "maximum": 103.0,
+        "scale": 2
+      }
+    ],
+    "anomalies": [
+      {
+        "name": "温度の固着",
+        "field": "temperature",
+        "operation": "freeze",
+        "from_row": 4000,
+        "to_row": 4399
+      }
+    ]
+  },
+  "history": {
+    "tags": [
+      "temperature",
+      "pressure_kpa"
+    ],
+    "devices": 8,
+    "initial_samples": 86400,
+    "sample_seconds": 1,
+    "missing_every": 0,
+    "bad_every": 0
+  },
+  "max_ticks": 2
+}

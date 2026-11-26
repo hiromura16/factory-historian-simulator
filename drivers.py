@@ -149,12 +149,13 @@ class HistorianDriver(Base):
         """欠測・時刻ずれ・品質異常を反映し、サンプルと次位置を同一取引で保存する。"""
         opts = self.options
         missing = opts.missing_every and (index + 1) % opts.missing_every == 0
-        ts = self.anchor + index * opts.sample_seconds
+        sample_time = self.anchor + index * opts.sample_seconds
         if opts.shift_every and (index + 1) % opts.shift_every == 0:
-            ts += opts.timestamp_shift_seconds
+            sample_time += opts.timestamp_shift_seconds
         rows = []
         for device in range(0 if missing else opts.devices):
             record = self.c.record(index * opts.devices + device)
+            ts = sample_time
             if opts.source_time_field and record.get(opts.source_time_field):
                 ts = datetime.fromisoformat(
                     record[opts.source_time_field]

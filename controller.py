@@ -10,7 +10,9 @@ import threading
 import time
 from pathlib import Path
 from models import Spec
-from generation import generate_record, validate_generation
+from api_support import display_location, history_error
+from generation import GenerationError, generate_record
+from validation import validate_source_spec
 
 
 class Controller:
@@ -43,6 +45,7 @@ class Controller:
                 "produced": self.produced,
                 "requests": self.requests,
                 "error": self.error,
+                "error_message": history_error(self.error),
                 "dataset_id": self.ds,
                 "recent": list(self.recent)[-30:],
                 "elapsed_seconds": round(time.time() - self.started, 2)
@@ -62,14 +65,7 @@ class Controller:
         with self.lock:
             if self.thread and self.thread.is_alive():
                 raise RuntimeError("実行中です。設定変更前に停止してください")
-            validate_generation(spec.generator)
-            if (
-                self.kind == "equipment"
-                and spec.equipment.devices * len(spec.generator.fields) > 5000
-            ):
-                raise ValueError(
-                    "1実行の設備ノードは5000項目以下にしてください"
-                )
+            validate_source_spec(self.kind, spec)
             profile, revision = self.store.profile(spec.profile_id, revision)
             if profile.auth_mode == "basic" and not profile.password:
                 raise ValueError("取得APIのBasic認証パスワードが必要です")
@@ -159,7 +155,7 @@ class Controller:
             raise RuntimeError("disk_space_low")
         for line in Path("/proc/meminfo").read_text().splitlines():
             if line.startswith("MemAvailable:") and int(line.split()[1]) < int(
-                float(os.environ.get("MIN_AVAILABLE_GIB", "6")) * 1024**2
+                float(os.environ.get("MIN_AVAILABLE_GIB", "1")) * 1024**2
             ):
                 raise RuntimeError("host_memory_headroom_low")
         if (
@@ -207,14 +203,8 @@ class Controller:
             self.status = "stopped"
         except Exception as exc:
             self.error = (
-                str(exc)
-                if isinstance(exc, ValueError)
-                or str(exc)
-                in {
-                    "disk_space_low",
-                    "host_memory_headroom_low",
-                    "storage_limit",
-                }
+                f"generation_error: {display_location(exc.path)}　{exc}" if isinstance(exc, GenerationError)
+                else str(exc) if str(exc) in {"disk_space_low", "host_memory_headroom_low", "storage_limit"}
                 else type(exc).__name__
             )
             self.status = "failed"
